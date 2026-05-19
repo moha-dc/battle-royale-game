@@ -1,4 +1,5 @@
-const socket = io();
+const SERVER_URL = window.location.hostname === 'localhost' ? '' : 'https://VOTRE_APP.railway.app';
+const socket = io(SERVER_URL);
 let myId = null;
 
 const canvas = document.getElementById('game');
