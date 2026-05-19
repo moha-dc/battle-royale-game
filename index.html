@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>DROP ZONE — Battle Royale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<!-- HUD -->
+<div id="top-bar" class="hud">
+  <div class="stat"><span class="label">RESTANTS</span><span class="val" id="alive">100</span></div>
+  <div class="stat"><span class="label">KILLS</span><span class="val" id="kills">0</span></div>
+  <div class="stat"><span class="label">ZONE</span><span class="val" id="zone-info">SÉCURISÉE</span></div>
+</div>
+
+<div id="storm-warn" class="hidden">⚠ LA TEMPÊTE APPROCHE ⚠</div>
+
+<div id="bottom-left" class="hud">
+  <div class="bar-row">
+    <div class="bar-icon" style="color:#5dffac">HP</div>
+    <div class="bar-track">
+      <div class="bar-fill health" id="hp-bar" style="width:100%"></div>
+      <div class="bar-text" id="hp-text">100</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-icon" style="color:#7fd1ff">SH</div>
+    <div class="bar-track">
+      <div class="bar-fill shield" id="sh-bar" style="width:0%"></div>
+      <div class="bar-text" id="sh-text">0</div>
+    </div>
+  </div>
+  <div id="resources">
+    <div class="item">🪵 <span class="v" id="wood">0</span></div>
+    <div class="item">🧱 <span class="v" id="brick">0</span></div>
+  </div>
+</div>
+
+<div id="weapons" class="hud">
+  <div class="weapon-slot active" id="slot-1"><div class="num">1</div><div class="name">PIOCHE</div></div>
+  <div class="weapon-slot empty" id="slot-2"><div class="num">2</div><div class="name">—</div></div>
+  <div class="weapon-slot empty" id="slot-3"><div class="num">3</div><div class="name">—</div></div>
+  <div class="weapon-slot" id="slot-4"><div class="num">4</div><div class="name">MUR</div></div>
+</div>
+
+<div id="bottom-right" class="hud">
+  <canvas id="minimap" width="160" height="160"></canvas>
+</div>
+
+<div id="flash"></div>
+
+<!-- Start screen -->
+<div class="overlay" id="start-screen">
+  <div class="title">DROP ZONE</div>
+  <div class="subtitle">★ BATTLE  ROYALE ★</div>
+  <div class="controls-grid">
+    <div class="key">ZQSD</div><div>Se déplacer</div>
+    <div class="key">SOURIS</div><div>Viser</div>
+    <div class="key">CLIC G.</div><div>Frapper / Tirer</div>
+    <div class="key">1 / 2 / 3</div><div>Changer d'arme</div>
+    <div class="key">4 ou B</div><div>Construire un mur (10 🪵)</div>
+    <div class="key">E</div><div>Ramasser un objet</div>
+    <div class="key">SHIFT</div><div>Courir</div>
+  </div>
+  <button class="primary" id="btn-start">LANCER LA PARTIE</button>
+</div>
+
+<!-- End screen -->
+<div class="overlay hidden" id="end-screen">
+  <div class="title" id="end-title">FIN</div>
+  <div id="end-stats"></div>
+  <button class="primary" id="btn-restart">REJOUER</button>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
