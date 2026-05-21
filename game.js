@@ -616,26 +616,100 @@ function drawFighters() {
 
 function drawFighter(f) {
   if (!onScreen(f.x, f.y, 60)) return;
-  ctx.fillStyle='rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(f.x+2,f.y+12,f.r*1.1,f.r*.5,0,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle=f.flash>0?'#fff':f.color;
-  ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle=f.isPlayer?'#000':'rgba(0,0,0,.6)'; ctx.lineWidth=3;
-  ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); ctx.stroke();
-  ctx.save(); ctx.translate(f.x,f.y); ctx.rotate(f.angle);
-  const slot=f.slots&&f.slots[f.slotIndex];
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,.3)';
+  ctx.beginPath(); ctx.ellipse(f.x+2, f.y+12, f.r*1.1, f.r*.5, 0, 0, Math.PI*2); ctx.fill();
+
+  if (f.isBot) {
+    drawBot(f);
+  } else {
+    drawHuman(f);
+  }
+
+  // Bars
+  const hp = f.hp ?? 100, maxHp = f.maxHp || 100;
+  if (hp < maxHp || f.shield > 0) {
+    drawSmallBar(f.x, f.y - f.r - 14, hp / maxHp, f.isBot ? '#ff5252' : '#5dffac');
+    if (f.shield > 0) drawSmallBar(f.x, f.y - f.r - 20, f.shield / (f.maxShield||100), '#7fd1ff');
+  }
+
+  // Label
+  ctx.font = 'bold 11px JetBrains Mono'; ctx.textAlign = 'center';
+  if (f.isPlayer) {
+    ctx.fillStyle = '#ffea00'; ctx.fillText('TOI', f.x, f.y - f.r - 26);
+  } else if (f.isBot) {
+    ctx.fillStyle = '#ff5252'; ctx.fillText('BOT', f.x, f.y - f.r - 26);
+  }
+}
+
+function drawHuman(f) {
+  // Body
+  ctx.fillStyle = f.flash > 0 ? '#fff' : f.color;
+  ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = f.isPlayer ? '#000' : 'rgba(0,0,0,.6)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2); ctx.stroke();
+  // Weapon + visor
+  ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.angle);
+  const slot = f.slots && f.slots[f.slotIndex];
   if (slot) {
-    const w=WEAPONS[slot.type];
-    if (w.kind==='melee') { ctx.fillStyle='#bbb'; ctx.fillRect(14,-3,18,6); ctx.fillStyle='#5c3a1e'; ctx.fillRect(8,-2,10,4); }
-    else { ctx.fillStyle=w.color; ctx.fillRect(8,-4,22,8); ctx.fillStyle='#222'; ctx.fillRect(28,-2,4,4); }
+    const w = WEAPONS[slot.type];
+    if (w && w.kind === 'melee') { ctx.fillStyle='#bbb'; ctx.fillRect(14,-3,18,6); ctx.fillStyle='#5c3a1e'; ctx.fillRect(8,-2,10,4); }
+    else if (w) { ctx.fillStyle=w.color; ctx.fillRect(8,-4,22,8); ctx.fillStyle='#222'; ctx.fillRect(28,-2,4,4); }
   }
   ctx.fillStyle='#1a1a2e'; ctx.fillRect(2,-8,12,5);
   ctx.fillStyle='#3da9fc'; ctx.fillRect(3,-7,10,2);
   ctx.restore();
-  if ((f.hp!=null && f.hp < (f.maxHp||100)) || (f.shield>0)) {
-    drawSmallBar(f.x, f.y-f.r-14, f.hp/(f.maxHp||100), '#5dffac');
-    if (f.shield>0) drawSmallBar(f.x, f.y-f.r-20, f.shield/(f.maxShield||100), '#7fd1ff');
+}
+
+function drawBot(f) {
+  const x = f.x, y = f.y, r = f.r;
+  const col = f.flash > 0 ? '#fff' : f.color;
+
+  // Hexagonal body
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
+    i === 0 ? ctx.moveTo(x + Math.cos(a)*r, y + Math.sin(a)*r)
+            : ctx.lineTo(x + Math.cos(a)*r, y + Math.sin(a)*r);
   }
-  if (f.isPlayer) { ctx.fillStyle='#ffea00'; ctx.font='bold 11px JetBrains Mono'; ctx.textAlign='center'; ctx.fillText('TOI', f.x, f.y-f.r-26); }
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Inner darker hex ring
+  ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
+    i === 0 ? ctx.moveTo(x + Math.cos(a)*(r*.6), y + Math.sin(a)*(r*.6))
+            : ctx.lineTo(x + Math.cos(a)*(r*.6), y + Math.sin(a)*(r*.6));
+  }
+  ctx.closePath(); ctx.stroke();
+
+  ctx.save(); ctx.translate(x, y); ctx.rotate(f.angle);
+
+  // Weapon
+  const slot = f.slots && f.slots[f.slotIndex];
+  if (slot && WEAPONS[slot.type]) {
+    const w = WEAPONS[slot.type];
+    ctx.fillStyle = w.color;
+    ctx.fillRect(10, -3, 20, 6);
+    ctx.fillStyle = '#111'; ctx.fillRect(28, -2, 5, 4);
+  }
+
+  // Robotic visor — red glowing eye
+  ctx.fillStyle = '#1a0000'; ctx.fillRect(2, -7, 12, 6);
+  ctx.fillStyle = f.flash > 0 ? '#fff' : '#ff2222';
+  ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 8;
+  ctx.fillRect(3, -6, 10, 2);
+  // Scanning line animation
+  const scanX = 3 + ((state.tick * 2 + parseInt(f.id?.replace(/\D/g,'') || 0)) % 10);
+  ctx.fillStyle = 'rgba(255,100,100,.6)'; ctx.fillRect(scanX, -6, 2, 2);
+  ctx.shadowBlur = 0;
+
+  ctx.restore();
 }
 
 function drawSmallBar(x, y, ratio, color) {
