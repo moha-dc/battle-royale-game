@@ -10,7 +10,7 @@ const io = new Server(server, {
 
 app.use(express.static('.'));
 
-const WORLD = 4000;
+const WORLD = 6000;
 const COLORS     = ['#52cfff', '#ff8c4b', '#c155ff', '#5dffac', '#ff5cd5', '#ff5252'];
 const BOT_COLORS = ['#ff5252', '#ff8c4b', '#c155ff', '#52cfff', '#5dffac', '#ff5cd5'];
 const GUN_TYPES  = ['pistol', 'shotgun', 'rifle', 'smg', 'sniper'];
@@ -22,12 +22,12 @@ const WEAPONS    = {
   smg:     { dmg:7,  cd:6,  speed:16, spread:0.12, range:500,  pellets:1, color:'#a85bff' },
   sniper:  { dmg:75, cd:90, speed:26, spread:0.01, range:1400, pellets:1, color:'#f6e651' },
 };
-const BOT_COUNT = 8;
+const BOT_COUNT = 20;
 const FRICTION  = 0.82;
 const mapSeed = Math.floor(Math.random() * 1e9);
 
 let players = {};
-let storm = { cx: WORLD/2, cy: WORLD/2, r: 2400, targetR: 2400, phase: 0, timer: 0, shrinkStart: 600, shrinkTime: 800, warnTime: 180 };
+let storm = { cx: WORLD/2, cy: WORLD/2, r: 3600, targetR: 3600, phase: 0, timer: 0, shrinkStart: 600, shrinkTime: 800, warnTime: 180 };
 let tick = 0;
 let gameActive = false;
 
@@ -109,11 +109,11 @@ function tickBots() {
     b.aiTimer++;
     if (b.cd > 0) b.cd--;
 
-    // Find nearest real player
+    // Find nearest alive entity (player or bot)
     let target = null, targetDist = Infinity;
     for (const pid in players) {
       const p = players[pid];
-      if (p.isBot || !p.alive) continue;
+      if (pid === id || !p.alive) continue;
       const d = Math.hypot(p.x - b.x, p.y - b.y);
       if (d < targetDist) { targetDist = d; target = p; }
     }
@@ -156,7 +156,7 @@ function tickBots() {
         // Damage only if roughly on target (simulate spread)
         if (Math.abs(aim - b.angle) < 0.12) {
           applyDamage(target.id, id, w.dmg);
-          io.to(target.id).emit('takeDamage', { amount: w.dmg, attackerId: id });
+          if (!target.isBot) io.to(target.id).emit('takeDamage', { amount: w.dmg, attackerId: id });
         }
       }
     }
@@ -256,7 +256,7 @@ io.on('connection', (socket) => {
       // Remove bots and reset
       for (const pid in players) if (players[pid].isBot) delete players[pid];
       gameActive = false; tick = 0;
-      storm = { cx: WORLD/2, cy: WORLD/2, r: 2400, targetR: 2400, phase: 0, timer: 0, shrinkStart: 600, shrinkTime: 800, warnTime: 180 };
+      storm = { cx: WORLD/2, cy: WORLD/2, r: 3600, targetR: 3600, phase: 0, timer: 0, shrinkStart: 600, shrinkTime: 800, warnTime: 180 };
     }
   });
 });

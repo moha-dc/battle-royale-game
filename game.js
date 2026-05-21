@@ -12,7 +12,7 @@ function resize() { W = window.innerWidth; H = window.innerHeight; canvas.width 
 window.addEventListener('resize', resize);
 resize();
 
-const WORLD = 4000;
+const WORLD = 6000;
 const TILE = 80;
 const FRICTION = 0.82;
 const PLAYER_SPEED = 3.2;
