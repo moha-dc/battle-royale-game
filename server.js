@@ -91,7 +91,8 @@ function createBots() {
       x: Math.max(100, Math.min(WORLD-100, WORLD/2 + Math.cos(a)*d)),
       y: Math.max(100, Math.min(WORLD-100, WORLD/2 + Math.sin(a)*d)),
       vx: 0, vy: 0, angle: 0,
-      hp: 100, shield: 0,
+      hp: 100, maxHp: 100, shield: 0, maxShield: 100,
+      r: 18, flash: 0,
       slots: [{ type: gun }], slotIndex: 0,
       wood: 0, brick: 0,
       color: BOT_COLORS[i % BOT_COLORS.length],
@@ -192,7 +193,7 @@ setInterval(() => {
     for (const id in players) {
       const b = players[id];
       if (!b.isBot) continue;
-      io.emit('playerMoved', { id, x: b.x, y: b.y, angle: b.angle, hp: b.hp, shield: b.shield, alive: b.alive, slots: b.slots, slotIndex: b.slotIndex, color: b.color });
+      io.emit('playerMoved', { id, x: b.x, y: b.y, angle: b.angle, hp: b.hp, maxHp: 100, shield: b.shield, alive: b.alive, slots: b.slots, slotIndex: b.slotIndex, color: b.color, r: 18, isBot: true });
     }
   }
 }, 1000 / 60);
