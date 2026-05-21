@@ -621,11 +621,7 @@ function drawFighter(f) {
   ctx.fillStyle = 'rgba(0,0,0,.3)';
   ctx.beginPath(); ctx.ellipse(f.x+2, f.y+12, f.r*1.1, f.r*.5, 0, 0, Math.PI*2); ctx.fill();
 
-  if (f.isBot) {
-    drawBot(f);
-  } else {
-    drawHuman(f);
-  }
+  drawHuman(f);
 
   // Bars
   const hp = f.hp ?? 100, maxHp = f.maxHp || 100;
@@ -662,55 +658,6 @@ function drawHuman(f) {
   ctx.restore();
 }
 
-function drawBot(f) {
-  const x = f.x, y = f.y, r = f.r;
-  const col = f.flash > 0 ? '#fff' : f.color;
-
-  // Hexagonal body
-  ctx.fillStyle = col;
-  ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
-    i === 0 ? ctx.moveTo(x + Math.cos(a)*r, y + Math.sin(a)*r)
-            : ctx.lineTo(x + Math.cos(a)*r, y + Math.sin(a)*r);
-  }
-  ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // Inner darker hex ring
-  ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 2;
-  ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
-    i === 0 ? ctx.moveTo(x + Math.cos(a)*(r*.6), y + Math.sin(a)*(r*.6))
-            : ctx.lineTo(x + Math.cos(a)*(r*.6), y + Math.sin(a)*(r*.6));
-  }
-  ctx.closePath(); ctx.stroke();
-
-  ctx.save(); ctx.translate(x, y); ctx.rotate(f.angle);
-
-  // Weapon
-  const slot = f.slots && f.slots[f.slotIndex];
-  if (slot && WEAPONS[slot.type]) {
-    const w = WEAPONS[slot.type];
-    ctx.fillStyle = w.color;
-    ctx.fillRect(10, -3, 20, 6);
-    ctx.fillStyle = '#111'; ctx.fillRect(28, -2, 5, 4);
-  }
-
-  // Robotic visor — red glowing eye
-  ctx.fillStyle = '#1a0000'; ctx.fillRect(2, -7, 12, 6);
-  ctx.fillStyle = f.flash > 0 ? '#fff' : '#ff2222';
-  ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 8;
-  ctx.fillRect(3, -6, 10, 2);
-  // Scanning line animation
-  const scanX = 3 + ((state.tick * 2 + parseInt(f.id?.replace(/\D/g,'') || 0)) % 10);
-  ctx.fillStyle = 'rgba(255,100,100,.6)'; ctx.fillRect(scanX, -6, 2, 2);
-  ctx.shadowBlur = 0;
-
-  ctx.restore();
-}
 
 function drawSmallBar(x, y, ratio, color) {
   const w=36, h=4;
